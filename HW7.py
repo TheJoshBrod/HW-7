@@ -58,7 +58,7 @@ def make_players_table(data, cur, conn):
         pos = x['position']
         cur.execute("SELECT id FROM Positions WHERE position = ?", (pos,))
         pos = cur.fetchone()[0]
-        values = (x['id'], x['name'], pos, x['dateOfBirth'], x['nationality'])
+        values = (x['id'], x['name'], pos, int(x['dateOfBirth'][0:4]), x['nationality'])
         cur.execute('INSERT OR IGNORE INTO players (id, name, position_id, birthyear, nationality) VALUES (?, ?, ?, ?, ?) ',values)
     conn.commit()
 
@@ -98,7 +98,10 @@ def nationality_search(countries, cur, conn):
 
 
 def birthyear_nationality_search(age, country, cur, conn):
-    pass
+    min_year = 2023 - age
+    cur.execute("SELECT name,nationality,birthyear FROM players WHERE nationality = ? AND ? > players.birthyear", (country,min_year))
+    valid = cur.fetchall()
+    return valid
 
 ## [TASK 4]: 15 points
 # finish the function position_birth_search
@@ -118,8 +121,10 @@ def birthyear_nationality_search(age, country, cur, conn):
     # HINT: You'll have to use JOIN for this task.
 
 def position_birth_search(position, age, cur, conn):
-       pass
-
+    min_year = 2023 - age
+    cur.execute("SELECT name,Positions.position,birthyear FROM players INNER JOIN Positions ON players.position_id = Positions.id WHERE Positions.position = ? AND ? < players.birthyear", (position,min_year))
+    valid = cur.fetchall()
+    return valid
 
 # [EXTRA CREDIT]
 # You’ll make 3 new functions, make_winners_table(), make_seasons_table(),
